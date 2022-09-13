@@ -255,6 +255,66 @@ def plot_figure_9b(dataframe_path=f"{DATAFRAME_DIR}/figure-9b-dataframe.csv"):
     plt.savefig(f'{FINAL_PLOTS_WRITE_DIR}/figure-9b.pdf', bbox_inches='tight')
 
 
+def plot_figure_9(a=f"{DATAFRAME_DIR}/figure-9a-dataframe.csv", b=f"{DATAFRAME_DIR}/figure-9b-dataframe.csv"):
+    # 9a
+    df = pandas.read_csv(a)
+    page_load_times = numpy.array([x for x in df['page_load_times'].tolist() if x != -1])
+    ip_page_load_times = numpy.array([x for x in df['ip_page_load_times'].tolist() if x != -1])
+    as_page_load_times = numpy.array([x for x in df['as_page_load_times'].tolist() if x != -1])
+    cf_only_page_load_times = numpy.array([x for x in df['cf_only_page_load_times'].tolist() if x != -1])
+    # 9b
+    df = pandas.read_csv(b)
+
+    control_plts = []
+    experiment_plts = []
+
+    for index, row in df.iterrows():
+        split_mode = row['Mode']
+        ccv2_plt = row['Time']
+        if split_mode == 'Experiment':
+            experiment_plts.append(ccv2_plt)
+        if split_mode == 'Control':
+            control_plts.append(ccv2_plt)
+
+    for (arr, category) in [(control_plts, 'Control - PLT'),
+                            (experiment_plts, 'Experiment - PLT')]:
+        for p in [50, 75, 90, 95, 99]:
+            pct_value = numpy.percentile(arr, p)
+            print(f'{category} [P{p}] = {pct_value}')
+    
+    fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(8, 12))
+    for arr, label_name, color, ltype, marker in [
+        (as_page_load_times, 'I.M. Origin Coalescing', 'green', '-', 'o'),
+        (ip_page_load_times, 'I.M. IP Coalescing', 'blue', '--', '*'),
+        (page_load_times, 'Measured', 'red', '-.', '+'),
+        (cf_only_page_load_times, 'I.M. CDN Origin Coalescing', 'black', ':', 'v'),
+    ]:
+        X, Y = _cdf(arr, sort_needed=True)
+        for p in [25, 50, 75, 90, 95, 99]:
+            print(label_name, p, numpy.percentile(numpy.array(arr), p))
+        ax[0].plot(X, Y, label=label_name, color=color, linestyle=ltype, linewidth=3)
+    ax[0].legend(fontsize=14)
+    ax[0].set_xscale('log')
+    ax[0].tick_params(axis='x', labelsize=14)
+    ax[0].tick_params(axis='y', labelsize=14)
+    ax[0].set_ylabel('CDF', fontsize=16)
+    ax[0].set_xlabel('Page Load Time (ms)', fontsize=16)
+    ax[0].grid(True, alpha=0.5)
+    
+    control_plt_X, control_plt_Y = _cdf(numpy.array(control_plts))
+    exp_plt_X, exp_plt_Y = _cdf(numpy.array(experiment_plts))
+    ax[1].plot(control_plt_X, control_plt_Y, label='Control', color='red', linestyle='-', linewidth=3)
+    ax[1].plot(exp_plt_X, exp_plt_Y, label='Experiment', color='black', linestyle=':', linewidth=3)
+    ax[1].legend(fontsize=14)
+    ax[1].set_xscale('log')
+    ax[1].tick_params(axis='x', labelsize=14)
+    ax[1].tick_params(axis='y', labelsize=14)
+    ax[1].set_ylabel('CDF', fontsize=16)
+    ax[1].set_xlabel('Page Load Time (ms)', fontsize=16)
+    ax[1].grid(True, alpha=0.5)
+    plt.savefig('plots/figure-9.pdf', bbox_inches='tight')
+
+
 def _inform(s):
     _RESET = '\033[0m'
     _GREEN = '\033[0;32m'
@@ -280,3 +340,4 @@ def plot_all_figures_in_paper():
     plot_figure_9a()
     _inform("Generating Figure 9b - Experimental Page Load Time for IP and ORIGIN based experiments.")
     plot_figure_9b()
+    plot_figure_9()
