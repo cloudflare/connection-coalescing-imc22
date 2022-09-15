@@ -1,7 +1,11 @@
-# Reproducing the Figures in the Paper
+# Connection Coalescing - Aggregate Data
 
-This repository contains the raw aggregate data and the scripts needed to re-generate
-every plot in the current paper.
+This repository contains the aggregate data and the scripts needed to re-generate
+every plot in the accepted IMC'22 paper, titled "Respect the ORIGIN! A Best-case Evaluation of Connection Coalescing in the Wild".
+
+_By: Sudheesh Singanamalla, Muhammad Talha Paracha, Suleman Ahmad Jonathan Hoyland, Luke Valenta, Yevgen Safronov, Peter Wu, Andrew Galloni, Kurtis Heimerl, Nick Sullivan, Christopher A. Wood, Marwan Fayed_
+
+## Reproducing the Figures in the Paper
 
 ```shell
 $ python generate.py
