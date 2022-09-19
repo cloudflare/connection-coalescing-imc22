@@ -11,6 +11,10 @@ import seaborn as sns
 from matplotlib.ticker import MaxNLocator
 import matplotlib.dates as mdates
 
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
+
 FINAL_PLOTS_WRITE_DIR = 'plots'
 DATAFRAME_DIR = 'data'
 
@@ -63,14 +67,15 @@ def plot_figure_3(dataframe_path=f"{DATAFRAME_DIR}/figure-3-dataframe.csv"):
     ip_coalescing_tls_dns_requests = numpy.array(df['ip_dns_tls'].tolist())
     origin_asn_coalescing_tls_dns_requests = numpy.array(df['origin_dns_tls'].tolist())
     fig, ax = plt.subplots(nrows=1, ncols=1)
-    for arr, label_name, color, ltype in [(no_coalescing_dns_requests, 'No Coalescing DNS Requests', 'red', '-'),
-                                          (no_coalescing_tls_requests, 'No Coalescing TLS Requests', 'red', '--'),
-                                          (ip_coalescing_tls_dns_requests, 'IP Coalescing DNS, TLS Requests', 'blue',
-                                           '-'),
-                                          (
-                                                  origin_asn_coalescing_tls_dns_requests,
-                                                  'Origin Coalescing DNS, TLS Requests',
-                                                  'green', '-')]:
+    for arr, label_name, color, ltype in [
+        (
+            origin_asn_coalescing_tls_dns_requests,
+            'Ideal Modelled Origin Coalescing',
+            'green', '-'),
+        (ip_coalescing_tls_dns_requests, 'Ideal Modelled IP Coalescing', 'blue',
+         '-'),
+        (no_coalescing_tls_requests, 'Measured TLS Requests', 'red', '--'),
+        (no_coalescing_dns_requests, 'Measured DNS Requests', 'red', '-')]:
         X, Y = _cdf(list(arr), sort_needed=True)
         ax.plot(X, Y, label=label_name, color=color, linestyle=ltype)
     ax.legend()
@@ -125,9 +130,9 @@ def plot_figure_5(dataframe_path=f"{DATAFRAME_DIR}/figure-5-dataframe.csv"):
     ax.scatter(entries, original, label='Existing Certificates', color='red', s=2, rasterized=True)
     ax.scatter(entries, updated, label='Ideal Certificates', color='blue', s=2, rasterized=True)
     ax.set_xscale('log')
-    ax.set_xlabel('# Websites Ranked by Existing SAN size')
-    ax.set_ylabel('# SAN entries in Certificates')
-    ax.legend()
+    ax.set_xlabel('# Websites Ranked by Existing SAN size', fontsize=14)
+    ax.set_ylabel('# SAN entries in Certificates', fontsize=14)
+    ax.legend(fontsize=14)
     plt.savefig(f'{FINAL_PLOTS_WRITE_DIR}/figure-5.pdf', bbox_inches='tight')
     plt.close()
 
@@ -167,9 +172,11 @@ def plot_figure_7(
         con_x, con_y = _cdf(con_noncoalesced_connections)
         ax.plot(exp_x, exp_y, label='Experiment', color='red')
         ax.plot(con_x, con_y, label='Control', color='blue')
-        ax.legend()
-        ax.set_xlabel('# New Connections to subresource\n (0 = coalescing)')
-        ax.set_ylabel('CDF')
+        ax.legend(fontsize=18)
+        ax.set_xlabel('# New Connections to subresource\n (0 = coalescing)', fontsize=18)
+        ax.set_ylabel('CDF', fontsize=18)
+        ax.tick_params(axis='x', labelsize=18)
+        ax.tick_params(axis='y', labelsize=18)
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         plt.savefig(f'{FINAL_PLOTS_WRITE_DIR}/{figure_name}.pdf', bbox_inches='tight')
         plt.close()
@@ -185,11 +192,13 @@ def plot_figure_8(control_timeline=f"{DATAFRAME_DIR}/origin_frame_control_timeli
     fig, ax = plt.subplots(nrows=1, ncols=1)
     sns.lineplot(x="Time", y="Count", label='Control', data=con_df)
     sns.lineplot(x="Time", y="Count", label='Experiment', data=exp_df, color='orange')
-    ax.legend()
+    ax.legend(fontsize=14)
     ax.axvline(x=datetime(day=11, month=1, year=2022), linestyle=':')
     ax.axvline(x=datetime(day=24, month=1, year=2022), linestyle=':')
-    ax.set_ylabel('#TLS connections per Second (100k)')
-    ax.set_xlabel('Time')
+    ax.set_ylabel('#TLS connections per Second (100k)', fontsize=14)
+    ax.set_xlabel('Time', fontsize=14)
+    ax.tick_params(axis='x', labelsize=14)
+    ax.tick_params(axis='y', labelsize=14)
     fig.get_figure().autofmt_xdate()
     plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
     ax.set_ylim(bottom=0)
@@ -312,7 +321,7 @@ def plot_figure_9(a=f"{DATAFRAME_DIR}/figure-9a-dataframe.csv", b=f"{DATAFRAME_D
     ax[1].set_ylabel('CDF', fontsize=16)
     ax[1].set_xlabel('Page Load Time (ms)', fontsize=16)
     ax[1].grid(True, alpha=0.5)
-    plt.savefig('plots/figure-9.pdf', bbox_inches='tight')
+    plt.savefig(f'{FINAL_PLOTS_WRITE_DIR}/figure-9.pdf', bbox_inches='tight')
 
 
 def _inform(s):
